@@ -4,12 +4,15 @@ add_definitions(-D_FLANN_VERSION=${FLANN_VERSION})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/flann/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/flann/config.h)
 
-file(GLOB_RECURSE C_SOURCES flann.cpp)
-file(GLOB_RECURSE CPP_SOURCES flann_cpp.cpp)
-file(GLOB_RECURSE CU_SOURCES *.cu)
+set(C_SOURCES flann/flann.cpp)
+set(CPP_SOURCES flann/flann_cpp.cpp)
+file(GLOB_RECURSE CU_SOURCES flann/*.cu)
+
 
 add_library(flann_cpp_s STATIC ${CPP_SOURCES})
 target_link_libraries(flann_cpp_s ${LZ4_LIBRARIES})
+#target_include_directories(flann_cpp_s PUBLIC ${CMAKE_SOURCE_DIR}/3rdparty/lz4/lib)
+
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
     set_target_properties(flann_cpp_s PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
@@ -30,7 +33,7 @@ if (BUILD_CUDA_LIB)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC)
-    add_library(flann_cpp SHARED "")
+    add_library(flann_cpp SHARED ${CPP_SOURCES})
     set_target_properties(flann_cpp PROPERTIES LINKER_LANGUAGE CXX)
     target_link_libraries(flann_cpp -Wl,-whole-archive flann_cpp_s -Wl,-no-whole-archive)
 
@@ -86,14 +89,16 @@ if (BUILD_C_BINDINGS)
         set_target_properties(flann_s PROPERTIES COMPILE_FLAGS -fPIC)
     endif()
     set_property(TARGET flann_s PROPERTY COMPILE_DEFINITIONS FLANN_STATIC)
+    target_include_directories(flann_s PRIVATE ${CMAKE_SOURCE_DIR}/3rdparty/lz4/lib)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC)
-        add_library(flann SHARED "")
+        add_library(flann SHARED ${C_SOURCES})
         set_target_properties(flann PROPERTIES LINKER_LANGUAGE CXX)
         target_link_libraries(flann -Wl,-whole-archive flann_s -Wl,-no-whole-archive)
     else()
         add_library(flann SHARED ${C_SOURCES})
         target_link_libraries(flann -Wl,--push-state,--no-as-needed ${LZ4_LIBRARIES} -Wl,--pop-state)
+        target_include_directories(flann PRIVATE ${CMAKE_SOURCE_DIR}/3rdparty/lz4/lib)
 
         if(MINGW AND OPENMP_FOUND)
           target_link_libraries(flann gomp)
