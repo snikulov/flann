@@ -214,48 +214,6 @@ install(
 )
 # Config
 #   * <prefix>/lib/cmake/flann/flann-targets.cmake
-install(
-    EXPORT "${targets_export_name}"
-    NAMESPACE "${namespace}"
-    DESTINATION "${config_install_dir}"
-)
-
-
-# CPACK options
-
-# RPM
-find_program(RPM_PROGRAM rpm)
-if(EXISTS ${RPM_PROGRAM})
-  list(APPEND CPACK_GENERATOR "RPM")
-endif(EXISTS ${RPM_PROGRAM})
-# DEB
-find_program(DPKG_PROGRAM dpkg)
-if(EXISTS ${DPKG_PROGRAM})
-  list(APPEND CPACK_GENERATOR "DEB")
-endif(EXISTS ${DPKG_PROGRAM})
-# NSIS
-find_program(NSIS_PROGRAM makensis MakeNSIS)
-if(EXISTS ${NSIS_PROGRAM})
-  list(APPEND CPACK_GENERATOR "NSIS")
-endif(EXISTS ${NSIS_PROGRAM})
-# dpkg
-find_program(PACKAGE_MAKER_PROGRAM PackageMaker
-	    HINTS /Developer/Applications/Utilities)
-if(EXISTS ${PACKAGE_MAKER_PROGRAM})
-  list(APPEND CPACK_GENERATOR "PackageMaker")
-endif(EXISTS ${PACKAGE_MAKER_PROGRAM})
-
-set(CPACK_GENERATOR "${CPACK_GENERATOR}")
-set(CPACK_MONOLITHIC_INSTALL 1)
-set(CPACK_SET_DESTDIR ON)
-include(InstallRequiredSystemLibraries)
-set(CPACK_PACKAGE_CONTACT "Marius Muja")
-set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-SET(CPACK_PACKAGE_VERSION ${FLANN_VERSION})
-SET(CPACK_PACKAGE_VERSION_MAJOR ${FLANN_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${FLANN_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${FLANN_VERSION_PATCH})
-include(CPack)
 
 
 message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
